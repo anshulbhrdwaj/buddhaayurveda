@@ -1,3 +1,5 @@
+import { ShoppingBag } from "lucide-react";
+
 import DiscordIcon from "@/components/icons/discord-icon";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,7 +10,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { cta } from "@/lib/landingData";
-import { ShoppingBag } from "lucide-react";
 
 export const CTASection = () => {
 	return (

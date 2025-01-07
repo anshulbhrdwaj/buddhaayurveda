@@ -1,3 +1,5 @@
+import { Check } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -8,7 +10,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { bundles } from "@/lib/landingData";
-import { Check } from "lucide-react";
 
 enum PopularPlan {
 	NO = 0,

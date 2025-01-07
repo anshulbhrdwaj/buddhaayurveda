@@ -1,6 +1,8 @@
 "use server";
-import Razorpay from "razorpay";
 import { createHmac } from "crypto";
+
+import Razorpay from "razorpay";
+
 import dbConnect from "./dbConnect";
 import OrderModel from "./models/OrderModel";
 
@@ -22,7 +24,7 @@ export async function createOrders({ orderId }: CreateOrdersInput) {
     return { error: "Product not found" };
   }
 
-  console.log("Product details:", order);
+  // console.log("Product details:", order);
 
   try {
     const key_id = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
@@ -50,7 +52,7 @@ export async function createOrders({ orderId }: CreateOrdersInput) {
 
     // Save the order details in the database
 
-    console.log(razorpayOrder)
+    // console.log(razorpayOrder)
     
     order.razorpayOrderId = razorpayOrder.id;
     await order.save();
@@ -85,7 +87,7 @@ export async function verifyPayment(data: {
     }
     await dbConnect();
 
-    console.log(razorpay_order_id)
+    // console.log(razorpay_order_id)
     // Find the order in the database using the Razorpay order ID
     const order = await OrderModel.findOne({ razorpayOrderId: razorpay_order_id });
 

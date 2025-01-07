@@ -1,3 +1,7 @@
+import { InstagramIcon } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+
 import GithubIcon from '@/components/icons/github-icon';
 import LinkedInIcon from '@/components/icons/linkedin-icon';
 import XIcon from '@/components/icons/x-icon';
@@ -9,9 +13,6 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { products } from '@/lib/landingData';
-import { InstagramIcon } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
 interface ProductsProps {
   imageUrl: string;
   firstName: string;

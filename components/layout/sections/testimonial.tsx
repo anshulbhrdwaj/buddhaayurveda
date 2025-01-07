@@ -1,4 +1,6 @@
 "use client";
+import { Star } from "lucide-react";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
 	Card,
@@ -15,7 +17,6 @@ import {
 	CarouselPrevious,
 } from "@/components/ui/carousel";
 import { testimonials } from "@/lib/landingData";
-import { Star } from "lucide-react";
 
 interface ReviewProps {
 	image: string;

@@ -1,10 +1,12 @@
 "use client";
 
+import { Marquee } from "@devnomic/marquee";
+import { icons } from "lucide-react";
+
 import { Icon } from "@/components/ui/icon";
 import { herbs } from "@/lib/landingData";
-import { Marquee } from "@devnomic/marquee";
+
 import "@devnomic/marquee/dist/index.css";
-import { icons } from "lucide-react";
 
 export const SponsorsSection = () => {
 	return (

@@ -1,7 +1,8 @@
+import { icons } from "lucide-react";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { benefits } from "@/lib/landingData";
-import { icons } from "lucide-react";
 
 interface BenefitsProps {
 	icon: string;

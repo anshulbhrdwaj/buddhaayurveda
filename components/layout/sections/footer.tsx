@@ -1,8 +1,9 @@
-import { Separator } from "@/components/ui/separator";
-import { company } from "@/lib/landingData";
 import { ChevronsDownIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+
+import { Separator } from "@/components/ui/separator";
+import { company } from "@/lib/landingData";
 
 export const FooterSection = () => {
 	return (

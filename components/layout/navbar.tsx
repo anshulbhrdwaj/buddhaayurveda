@@ -1,15 +1,13 @@
 'use client';
 import { ChevronsDown, Github, InstagramIcon, Menu } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 import React from 'react';
-import {
-  Sheet,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '../ui/sheet';
-import { Separator } from '../ui/separator';
+
+import { company, navbar } from '@/lib/landingData';
+
+import { ToggleTheme } from './toogle-theme';
+import { Button } from '../ui/button';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -18,11 +16,16 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from '../ui/navigation-menu';
-import { Button } from '../ui/button';
-import Link from 'next/link';
-import Image from 'next/image';
-import { ToggleTheme } from './toogle-theme';
-import { company, navbar } from '@/lib/landingData';
+import { Separator } from '../ui/separator';
+import {
+  Sheet,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '../ui/sheet';
+
 
 interface RouteProps {
   href: string;

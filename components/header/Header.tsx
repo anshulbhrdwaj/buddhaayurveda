@@ -1,9 +1,10 @@
 import { AlignJustify } from 'lucide-react';
 import Link from 'next/link';
 
+import { company } from '@/lib/landingData';
+
 import Menu from './Menu';
 import { SearchBox } from './SearchBox';
-import { company } from '@/lib/landingData';
 
 const Header = () => {
   return (

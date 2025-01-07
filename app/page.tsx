@@ -1,15 +1,15 @@
 import { Navbar } from '@/components/layout/navbar';
 import { BenefitsSection } from '@/components/layout/sections/benefits';
-import { CTASection } from '@/components/layout/sections/cta';
+import { BundleSection } from '@/components/layout/sections/bundle';
 import { ContactSection } from '@/components/layout/sections/contact';
+import { CTASection } from '@/components/layout/sections/cta';
 import { FAQSection } from '@/components/layout/sections/faq';
 import { FeaturesSection } from '@/components/layout/sections/features';
 import { FooterSection } from '@/components/layout/sections/footer';
 import { HeroSection } from '@/components/layout/sections/hero';
-import { BundleSection } from '@/components/layout/sections/bundle';
-import { ServicesSection } from '@/components/layout/sections/services';
-import { SponsorsSection } from '@/components/layout/sections/sponsors';
+// import { ServicesSection } from '@/components/layout/sections/services';
 import { ProductsSection } from '@/components/layout/sections/products';
+import { SponsorsSection } from '@/components/layout/sections/sponsors';
 import { TestimonialSection } from '@/components/layout/sections/testimonial';
 
 export const metadata = {
