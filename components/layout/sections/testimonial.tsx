@@ -75,7 +75,7 @@ export const TestimonialSection = () => {
 
 										<div className="flex flex-col">
 											<CardTitle className="text-lg">{review.name}</CardTitle>
-											<CardDescription>{review.userName}</CardDescription>
+											{/* <CardDescription>{review.userName}</CardDescription> */}
 										</div>
 									</div>
 								</CardHeader>
