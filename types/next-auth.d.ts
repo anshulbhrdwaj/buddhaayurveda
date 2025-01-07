@@ -4,6 +4,7 @@ declare module 'next-auth' {
   interface Session {
     user: {
       _id?: string | null;
+      contact?: string | null;
       isAdmin?: boolean;
     } & DefaultSession['user'];
   }
@@ -11,5 +12,6 @@ declare module 'next-auth' {
   export interface User extends DefaultUser {
     _id?: string;
     isAdmin?: boolean;
+    contact?: string;
   }
 }
