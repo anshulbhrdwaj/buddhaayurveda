@@ -1,44 +1,53 @@
 import { cache } from 'react';
-
 import dbConnect from '@/lib/dbConnect';
 import ProductModel, { Product } from '@/lib/models/ProductModel';
 
 export const revalidate = 3600;
+
+const mapMongoToProduct = (product: any): Product => ({
+  ...product,
+  _id: product._id.toString(), // Convert MongoDB ObjectId to string
+});
 
 const getLatest = cache(async () => {
   await dbConnect();
   const products = await ProductModel.find({})
     .sort({ _id: -1 })
     .limit(8)
-    .lean(); // Converts the MongoDB documents to plain JavaScript objects
-  return products;
+    .lean();
+
+  return products.map(mapMongoToProduct);
 });
 
 const getTopRated = cache(async () => {
   await dbConnect();
   const products = await ProductModel.find({})
-    .sort({ rating: -1 }) // Sort by rating in descending order
+    .sort({ rating: -1 })
     .limit(8)
-    .lean(); // Converts the MongoDB documents to plain JavaScript objects
-  return products;
+    .lean();
+
+  return products.map(mapMongoToProduct);
 });
 
-// intentionally disable Next.js Cache to better demo
+// Intentionally disable Next.js Cache to better demo
 const getFeatured = async () => {
   await dbConnect();
   const products = await ProductModel.find({ isFeatured: true })
     .limit(3)
     .lean();
-  return products;
+
+  return products.map(mapMongoToProduct);
 };
 
 const getBySlug = cache(async (slug: string) => {
   await dbConnect();
   const product = await ProductModel.findOne({ slug }).lean();
-  return product;
+
+  return product ? mapMongoToProduct(product) : null;
 });
 
 const PAGE_SIZE = 3;
+
 const getByQuery = cache(
   async ({
     q,
@@ -57,34 +66,22 @@ const getByQuery = cache(
   }) => {
     await dbConnect();
 
-    const queryFilter =
-      q && q !== 'all'
-        ? {
-            name: {
-              $regex: q,
-              $options: 'i',
-            },
-          }
-        : {};
+    const queryFilter = q && q !== 'all'
+      ? { name: { $regex: q, $options: 'i' } }
+      : {};
     const categoryFilter = category && category !== 'all' ? { category } : {};
-    const ratingFilter =
-      rating && rating !== 'all'
-        ? {
-            rating: {
-              $gte: Number(rating),
-            },
-          }
-        : {};
-    // 10-50
-    const priceFilter =
-      price && price !== 'all'
-        ? {
-            price: {
-              $gte: Number(price.split('-')[0]),
-              $lte: Number(price.split('-')[1]),
-            },
-          }
-        : {};
+    const ratingFilter = rating && rating !== 'all'
+      ? { rating: { $gte: Number(rating) } }
+      : {};
+    const priceFilter = price && price !== 'all'
+      ? {
+          price: {
+            $gte: Number(price.split('-')[0]),
+            $lte: Number(price.split('-')[1]),
+          },
+        }
+      : {};
+
     const order: Record<string, 1 | -1> =
       sort === 'lowest'
         ? { price: 1 }
@@ -117,7 +114,7 @@ const getByQuery = cache(
     });
 
     return {
-      products: products,
+      products: products.map(mapMongoToProduct),
       countProducts,
       page,
       pages: Math.ceil(countProducts / PAGE_SIZE),
