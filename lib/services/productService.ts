@@ -11,7 +11,7 @@ const getLatest = cache(async () => {
     .sort({ _id: -1 })
     .limit(8)
     .lean(); // Converts the MongoDB documents to plain JavaScript objects
-  return products as Product[];
+  return products;
 });
 
 const getTopRated = cache(async () => {
@@ -20,7 +20,7 @@ const getTopRated = cache(async () => {
     .sort({ rating: -1 }) // Sort by rating in descending order
     .limit(8)
     .lean(); // Converts the MongoDB documents to plain JavaScript objects
-  return products as Product[];
+  return products;
 });
 
 // intentionally disable Next.js Cache to better demo
@@ -29,13 +29,13 @@ const getFeatured = async () => {
   const products = await ProductModel.find({ isFeatured: true })
     .limit(3)
     .lean();
-  return products as Product[];
+  return products;
 };
 
 const getBySlug = cache(async (slug: string) => {
   await dbConnect();
   const product = await ProductModel.findOne({ slug }).lean();
-  return product as Product;
+  return product;
 });
 
 const PAGE_SIZE = 3;
@@ -117,7 +117,7 @@ const getByQuery = cache(
     });
 
     return {
-      products: products as Product[],
+      products: products,
       countProducts,
       page,
       pages: Math.ceil(countProducts / PAGE_SIZE),
