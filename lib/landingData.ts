@@ -1,5 +1,5 @@
 export const company = {
-  logo: '/logo.jpeg',
+  logo: 'https://res.cloudinary.com/unchartedrealm/image/upload/v1736227669/logo_chjlfr.jpg',
   name: 'Buddha Ayurveda',
   instagram: 'https://www.instagram.com/buddha_ayurveda/',
   facebook: 'https://www.facebook.com/budhhaayurveda/',

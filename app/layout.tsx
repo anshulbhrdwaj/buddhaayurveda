@@ -6,8 +6,9 @@ import { ThemeProvider } from '@/components/layout/theme-provider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Shadcn - Landing template',
-  description: 'Landing template from Shadcn',
+  title: 'Buddha Ayurveda - Ayurvedic Health Products',
+  description:
+    'At Budhha Ayurveda, we bring the power of nature to your doorstep. Experience pure Ayurveda, crafted for modern lifestyles.',
 };
 
 export default function RootLayout({
