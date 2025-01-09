@@ -41,7 +41,7 @@ export default function UserEditForm({ userId }: { userId: string }) {
 
   useEffect(() => {
     if (!user) return;
-    setValue('name', user.name);
+    setValue('fullName', user.fullName);
     setValue('email', user.email);
     setValue('isAdmin', user.isAdmin);
   }, [user, setValue]);
@@ -90,7 +90,7 @@ export default function UserEditForm({ userId }: { userId: string }) {
       <h1 className='py-4 text-2xl'>Edit User {formatId(userId)}</h1>
       <div>
         <form onSubmit={handleSubmit(formSubmit)}>
-          <FormInput name='Name' id='name' required />
+          <FormInput name='Name' id='fullName' required />
           <FormInput name='Email' id='email' required />
 
           <div className='my-3 md:flex'>
