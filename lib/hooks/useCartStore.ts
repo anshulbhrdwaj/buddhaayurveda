@@ -28,6 +28,8 @@ const initialState: Cart = {
     city: '',
     postalCode: '',
     country: '',
+    email: '',
+    contact: '',
   },
 };
 
