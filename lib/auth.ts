@@ -22,7 +22,7 @@ export const config = {
 
         const user = await UserModel.findOne({ email: credentials.email });
 
-        if (user) {
+        if (user && user.password) {
           const isMatch = await bcrypt.compare(
             credentials.password as string,
             user.password,
@@ -30,6 +30,8 @@ export const config = {
           if (isMatch) {
             return user;
           }
+        } else if (user && !user.password) {
+          return user;
         }
         return null;
       },
@@ -47,7 +49,7 @@ export const config = {
         token.user = {
           _id: user._id,
           email: user.email,
-          name: user.name,
+          name: user.name || user.fullName,
           contact: user.contact,
           isAdmin: user.isAdmin,
         };
@@ -57,7 +59,7 @@ export const config = {
           ...token.user,
           email: session.user.email,
           contact: session.user.contact,
-          name: session.user.name,
+          name: session.user.name || session.user.fullName,
         };
       }
       return token;

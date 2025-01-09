@@ -9,6 +9,7 @@ import useSWRMutation from 'swr/mutation';
 
 import CheckoutSteps from '@/components/checkout/CheckoutSteps';
 import useCartService from '@/lib/hooks/useCartStore';
+import { createOrders, verifyPayment } from '@/lib/razorpay';
 
 const Form = () => {
   const router = useRouter();
@@ -68,6 +69,72 @@ const Form = () => {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // async function createRazorpayOrder() {
+  //   try {
+  //     // Call API to create Razorpay order
+  //     const res = await fetch(`/api/orders/${orderId}/create-razorpay-order`, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //     });
+  
+  //     const result = await res.json();
+  
+  //     if (result.error) {
+  //       toast.error('Error creating order');
+  //       return;
+  //     }
+  
+  //     const options = {
+  //       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+  //       amount: totalPrice * 100, // Assuming totalPrice is in INR
+  //       currency: 'INR',
+  //       name: 'Ecommerce Store',
+  //       description: 'Order Payment',
+  //       image: '/logo.png', // Update with your brand's logo
+  //       order_id: result.orderId,
+  //       handler: async (response: any) => {
+  //         const paymentVerificationRes = await fetch(
+  //           `/api/orders/${orderId}/verify-razorpay-payment`,
+  //           {
+  //             method: 'POST',
+  //             headers: {
+  //               'Content-Type': 'application/json',
+  //             },
+  //             body: JSON.stringify(response),
+  //           }
+  //         );
+  
+  //         const verificationResult = await paymentVerificationRes.json();
+  
+  //         if (verificationResult.error) {
+  //           toast.error('Payment verification failed');
+  //           return;
+  //         }
+  
+  //         toast.success('Payment successful');
+  //         // router.push('/store/payment?status=success');
+  //       },
+  //       prefill: {
+  //         name: shippingAddress.fullName || 'Guest',
+  //         email: shippingAddress.email || 'guest@example.com',
+  //         contact: shippingAddress.contact || '9999999999',
+  //       },
+  //       theme: {
+  //         color: '#3399cc',
+  //       },
+  //     };
+  
+  //     const rzp = new (window as any).Razorpay(options);
+  //     rzp.open();
+  //   } catch (error) {
+  //     toast.error('An error occurred while processing your payment.');
+  //   }
+  // }
+
+  
 
   if (!mounted) return <>Loading...</>;
 

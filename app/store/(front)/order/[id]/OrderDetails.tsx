@@ -85,56 +85,7 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
     paidAt,
   } = data;
 
-  // function createRazorpayOrder() {
-  //   startTransition(async () => {
-  //     const script = document.createElement("script");
-  //     script.src = "https://checkout.razorpay.com/v1/checkout.js";
-  //     script.async = true;
-
-  //     script.onload = async () => {
-  //       const result = await createOrders({ productId: orderId, quantity: 1 });
-
-  //       if (result.error) {
-  //         alert("Error creating orders");
-  //         return;
-  //       }
-
-  //       const options = {
-  //         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-  //         amount: (item.price - item.price * (product.discount / 100)) * 100,
-  //         currency: "USD",
-  //         name: "Payment Gateways Demo",
-  //         image: `${process.env.NEXT_PUBLIC_BASE_URL}${product.image}`,
-  //         order_id: result.orderId,
-  //         handler: async function (response: {
-  //           razorpay_payment_id: string;
-  //           razorpay_order_id: string;
-  //           razorpay_signature: string;
-  //         }) {
-  //           const result = await verifyPayment(response);
-  //           if (result.error) {
-  //             toast.error("Payment failed");
-  //             router.push("/payment?status=failed");
-  //             return;
-  //           }
-  //           router.push("/payment?status=success");
-  //           toast.success("Payment successful");
-  //         },
-  //         prefill: {
-  //           name: "Payment Gateways Demo",
-  //           email: "premprakash@example.com",
-  //           contact: "9999999999",
-  //         },
-  //       };
-
-  //       const rzp = new (window as any).Razorpay(options);
-  //       rzp.open();
-  //     };
-
-  //     document.body.appendChild(script);
-  //   });
-  // }
-
+ 
   function loadRazorpayScript(src: string) {
     return new Promise((resolve) => {
       const script = document.createElement('script');
@@ -196,6 +147,71 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
       toast.error('An error occurred while processing your payment.');
     }
   }
+
+  // async function createRazorpayOrder() {
+  //   try {
+  //     // Call API to create Razorpay order
+  //     const res = await fetch(`/api/orders/${orderId}/create-razorpay-order`, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //     });
+  
+  //     const result = await res.json();
+  
+  //     if (result.error) {
+  //       toast.error('Error creating order');
+  //       return;
+  //     }
+  
+  //     const options = {
+  //       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+  //       amount: totalPrice * 100, // Assuming totalPrice is in INR
+  //       currency: 'INR',
+  //       name: 'Ecommerce Store',
+  //       description: 'Order Payment',
+  //       image: '/logo.png', // Update with your brand's logo
+  //       order_id: result.orderId,
+  //       handler: async (response: any) => {
+  //         const paymentVerificationRes = await fetch(
+  //           `/api/orders/${orderId}/verify-razorpay-payment`,
+  //           {
+  //             method: 'POST',
+  //             headers: {
+  //               'Content-Type': 'application/json',
+  //             },
+  //             body: JSON.stringify(response),
+  //           }
+  //         );
+  
+  //         const verificationResult = await paymentVerificationRes.json();
+  
+  //         if (verificationResult.error) {
+  //           toast.error('Payment verification failed');
+  //           return;
+  //         }
+  
+  //         toast.success('Payment successful');
+  //         // router.push('/store/payment?status=success');
+  //       },
+  //       prefill: {
+  //         name: shippingAddress.fullName || 'Guest',
+  //         email: shippingAddress.email || 'guest@example.com',
+  //         contact: shippingAddress.contact || '9999999999',
+  //       },
+  //       theme: {
+  //         color: '#3399cc',
+  //       },
+  //     };
+  
+  //     const rzp = new (window as any).Razorpay(options);
+  //     rzp.open();
+  //   } catch (error) {
+  //     toast.error('An error occurred while processing your payment.');
+  //   }
+  // }
+
 
   return (
     <div>

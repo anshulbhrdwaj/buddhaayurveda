@@ -95,4 +95,6 @@ export type ShippingAddress = {
   city: string;
   postalCode: string;
   country: string;
+  contact: string;
+  email: string;
 };

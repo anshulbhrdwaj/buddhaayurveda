@@ -16,7 +16,7 @@ const Header = () => {
               <AlignJustify />
             </label>
             <Link
-              href='/'
+              href='/store'
               className='ml-2 text-base font-semibold sm:ml-4 sm:text-lg'
             >
               {company.name}

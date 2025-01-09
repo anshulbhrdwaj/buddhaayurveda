@@ -59,7 +59,7 @@ const Menu = () => {
           <li>
             <div className='dropdown dropdown-end dropdown-bottom'>
               <label tabIndex={0} className='btn btn-ghost rounded-btn'>
-                {session.user.name}
+                {session.user.name || session.user.fullName}
                 <ChevronDown />
               </label>
               <ul

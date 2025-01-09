@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 export type User = {
   _id: string;
-  name: string;
+  fullName: string;
   email: string;
   contact: string;
   isAdmin: boolean;
@@ -10,7 +10,7 @@ export type User = {
 
 const UserSchema = new mongoose.Schema(
   {
-    name: {
+    fullName: {
       type: String,
       required: true,
     },
@@ -21,11 +21,13 @@ const UserSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      // required: true,
+      default: null,
     },
     contact: {
       type: String,
       required: true,
+      unique: true,
     },
     isAdmin: { type: Boolean, required: true, default: false },
   },

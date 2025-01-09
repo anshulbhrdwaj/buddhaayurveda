@@ -19,11 +19,19 @@ const Sidebar = () => {
   return (
     <ul className='menu min-h-full w-80 bg-base-200 p-4 text-base-content'>
       <li>
+        <Link href={`/store/`} className='text-lg font-bold' onClick={toggleDrawer}>
+          Home
+        </Link>
+      </li>
+      <li>
         <h2 className='text-xl'>Shop Categories</h2>
       </li>
       {categories.map((category: string) => (
         <li key={category}>
-          <Link href={`/store/search?category=${category}`} onClick={toggleDrawer}>
+          <Link
+            href={`/store/search?category=${category}`}
+            onClick={toggleDrawer}
+          >
             {category}
           </Link>
         </li>

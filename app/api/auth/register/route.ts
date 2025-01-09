@@ -5,29 +5,35 @@ import dbConnect from '@/lib/dbConnect';
 import UserModel from '@/lib/models/UserModel';
 
 export const POST = async (request: NextRequest) => {
-  const { name, email, contact, password } = await request.json();
+  const { fullName, email, contact, password = null } = await request.json();
   await dbConnect();
-  const hashedPassword = await bcrypt.hash(password, 5);
+
+  let hashedPassword = null;
+  if (password) {
+    hashedPassword = await bcrypt.hash(password, 5);
+  }
+
   const newUser = new UserModel({
-    name,
+    fullName,
     email,
     contact,
-    password: hashedPassword,
+    password: hashedPassword, // Can be null if no password is provided
   });
+
   try {
     await newUser.save();
     return Response.json(
       { message: 'User has been created' },
       {
         status: 201,
-      },
+      }
     );
   } catch (err: any) {
     return Response.json(
       { message: err.message },
       {
         status: 500,
-      },
+      }
     );
   }
 };
