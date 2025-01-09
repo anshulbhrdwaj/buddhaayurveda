@@ -8,7 +8,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 type Inputs = {
-  name: string;
+  fullName: string;
   email: string;
   contact: string;
   password: string;
@@ -29,7 +29,7 @@ const Form = () => {
     formState: { errors, isSubmitting },
   } = useForm<Inputs>({
     defaultValues: {
-      name: '',
+      fullName: '',
       email: '',
       contact: '',
       password: '',
@@ -44,7 +44,7 @@ const Form = () => {
   }, [callbackUrl, params, router, session]);
 
   const formSubmit: SubmitHandler<Inputs> = async (form) => {
-    const { name, email, contact,password } = form;
+    const { fullName, email, contact,password } = form;
 
     try {
       const res = await fetch('/api/auth/register', {
@@ -53,7 +53,7 @@ const Form = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name,
+          fullName,
           email,
           contact,
           password,
@@ -88,13 +88,13 @@ const Form = () => {
             <input
               type='text'
               id='name'
-              {...register('name', {
+              {...register('fullName', {
                 required: 'Name is required',
               })}
               className='input input-bordered w-full max-w-sm'
             />
-            {errors.name?.message && (
-              <div className='text-error'>{errors.name.message}</div>
+            {errors.fullName?.message && (
+              <div className='text-error'>{errors.fullName.message}</div>
             )}
           </div>
           <div className='my-2'>

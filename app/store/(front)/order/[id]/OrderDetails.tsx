@@ -12,7 +12,7 @@ import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
 import { OrderItem } from '@/lib/models/OrderModel';
-import { createOrders, verifyPayment } from '@/lib/razorpay';
+import { createOrders, loadRazorpayScript, verifyPayment } from '@/lib/razorpay';
 
 
 interface IOrderDetails {
@@ -86,15 +86,7 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
   } = data;
 
  
-  function loadRazorpayScript(src: string) {
-    return new Promise((resolve) => {
-      const script = document.createElement('script');
-      script.src = src;
-      script.async = true;
-      script.onload = resolve;
-      document.body.appendChild(script);
-    });
-  }
+
 
   async function createRazorpayOrder() {
     try {
