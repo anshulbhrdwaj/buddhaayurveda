@@ -115,12 +115,4 @@ export async function verifyPayment(data: {
   }
 }
 
-export async function loadRazorpayScript(src: string) {
-  return new Promise((resolve) => {
-    const script = document.createElement('script');
-    script.src = src;
-    script.async = true;
-    script.onload = resolve;
-    document.body.appendChild(script);
-  });
-}
+

@@ -6,14 +6,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import toast from 'react-hot-toast';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
 import { OrderItem } from '@/lib/models/OrderModel';
-import { createOrders, loadRazorpayScript, verifyPayment } from '@/lib/razorpay';
-
+import { createOrders, verifyPayment } from '@/lib/razorpay';
 
 interface IOrderDetails {
   orderId: string;
@@ -24,6 +23,7 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
   const { data: session } = useSession();
   const [loading, startTransition] = useTransition();
   const router = useRouter();
+  const [isCreatingRazorpayOrder, setIsCreatingRazorpayOrder] = useState(false);
 
   const { trigger: deliverOrder, isMutating: isDelivering } = useSWRMutation(
     `/api/orders/${orderId}`,
@@ -85,10 +85,18 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
     paidAt,
   } = data;
 
- 
-
+  async function loadRazorpayScript(src: string) {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = true;
+      script.onload = resolve;
+      document.body.appendChild(script);
+    });
+  }
 
   async function createRazorpayOrder() {
+    setIsCreatingRazorpayOrder(true);
     try {
       await loadRazorpayScript('https://checkout.razorpay.com/v1/checkout.js');
 
@@ -124,7 +132,7 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
           // router.push('/store/payment?status=success');
         },
         prefill: {
-          name: session?.user.name || 'Guest',
+          name: session?.user.name || session?.user.fullName || 'Guest',
           email: session?.user.email || 'guest@example.com',
           contact: session?.user.contact || '9999999999', // Replace with user contact if available
         },
@@ -137,6 +145,8 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
       rzp.open();
     } catch (error) {
       toast.error('An error occurred while processing your payment.');
+    } finally {
+      setIsCreatingRazorpayOrder(false);
     }
   }
 
@@ -149,14 +159,14 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
   //         'Content-Type': 'application/json',
   //       },
   //     });
-  
+
   //     const result = await res.json();
-  
+
   //     if (result.error) {
   //       toast.error('Error creating order');
   //       return;
   //     }
-  
+
   //     const options = {
   //       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
   //       amount: totalPrice * 100, // Assuming totalPrice is in INR
@@ -176,14 +186,14 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
   //             body: JSON.stringify(response),
   //           }
   //         );
-  
+
   //         const verificationResult = await paymentVerificationRes.json();
-  
+
   //         if (verificationResult.error) {
   //           toast.error('Payment verification failed');
   //           return;
   //         }
-  
+
   //         toast.success('Payment successful');
   //         // router.push('/store/payment?status=success');
   //       },
@@ -196,14 +206,13 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
   //         color: '#3399cc',
   //       },
   //     };
-  
+
   //     const rzp = new (window as any).Razorpay(options);
   //     rzp.open();
   //   } catch (error) {
   //     toast.error('An error occurred while processing your payment.');
   //   }
   // }
-
 
   return (
     <div>
@@ -330,6 +339,7 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
                     <button
                       className='btn my-2 w-full'
                       onClick={createRazorpayOrder}
+                      disabled={isCreatingRazorpayOrder || isPaid}
                     >
                       Pay with Razorpay
                     </button>

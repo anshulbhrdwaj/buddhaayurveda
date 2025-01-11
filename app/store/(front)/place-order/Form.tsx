@@ -10,6 +10,7 @@ import useSWRMutation from 'swr/mutation';
 import CheckoutSteps from '@/components/checkout/CheckoutSteps';
 import useCartService from '@/lib/hooks/useCartStore';
 import { createOrders, verifyPayment } from '@/lib/razorpay';
+import { useSession } from 'next-auth/react';
 
 const Form = () => {
   const router = useRouter();
@@ -23,6 +24,9 @@ const Form = () => {
     totalPrice,
     clear,
   } = useCartService();
+
+  const { data: session } = useSession();
+  const [isCreatingRazorpayOrder, setIsCreatingRazorpayOrder] = useState(false);
 
   // mutate data in the backend by calling trigger function
   const { trigger: placeOrder, isMutating: isPlacing } = useSWRMutation(
@@ -41,11 +45,13 @@ const Form = () => {
           taxPrice,
           shippingPrice,
           totalPrice,
+          user: { name: session?.user.fullName },
         }),
       });
       const data = await res.json();
       if (res.ok) {
         clear();
+        createRazorpayOrder(data.order._id);
         toast.success('Order placed successfully');
         return router.push(`/store/order/${data.order._id}`);
       } else {
@@ -70,71 +76,70 @@ const Form = () => {
     setMounted(true);
   }, []);
 
-  // async function createRazorpayOrder() {
-  //   try {
-  //     // Call API to create Razorpay order
-  //     const res = await fetch(`/api/orders/${orderId}/create-razorpay-order`, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //     });
-  
-  //     const result = await res.json();
-  
-  //     if (result.error) {
-  //       toast.error('Error creating order');
-  //       return;
-  //     }
-  
-  //     const options = {
-  //       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
-  //       amount: totalPrice * 100, // Assuming totalPrice is in INR
-  //       currency: 'INR',
-  //       name: 'Ecommerce Store',
-  //       description: 'Order Payment',
-  //       image: '/logo.png', // Update with your brand's logo
-  //       order_id: result.orderId,
-  //       handler: async (response: any) => {
-  //         const paymentVerificationRes = await fetch(
-  //           `/api/orders/${orderId}/verify-razorpay-payment`,
-  //           {
-  //             method: 'POST',
-  //             headers: {
-  //               'Content-Type': 'application/json',
-  //             },
-  //             body: JSON.stringify(response),
-  //           }
-  //         );
-  
-  //         const verificationResult = await paymentVerificationRes.json();
-  
-  //         if (verificationResult.error) {
-  //           toast.error('Payment verification failed');
-  //           return;
-  //         }
-  
-  //         toast.success('Payment successful');
-  //         // router.push('/store/payment?status=success');
-  //       },
-  //       prefill: {
-  //         name: shippingAddress.fullName || 'Guest',
-  //         email: shippingAddress.email || 'guest@example.com',
-  //         contact: shippingAddress.contact || '9999999999',
-  //       },
-  //       theme: {
-  //         color: '#3399cc',
-  //       },
-  //     };
-  
-  //     const rzp = new (window as any).Razorpay(options);
-  //     rzp.open();
-  //   } catch (error) {
-  //     toast.error('An error occurred while processing your payment.');
-  //   }
-  // }
+  async function loadRazorpayScript(src: string) {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = true;
+      script.onload = resolve;
+      document.body.appendChild(script);
+    });
+  }
 
-  
+  async function createRazorpayOrder(orderId: string) {
+    setIsCreatingRazorpayOrder(true);
+    try {
+      await loadRazorpayScript('https://checkout.razorpay.com/v1/checkout.js');
+
+      const result = await createOrders({ orderId });
+
+      if (result.error) {
+        toast.error('Error creating order');
+        return;
+      }
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+        amount: totalPrice * 100, // Assuming totalPrice is in INR
+        currency: 'INR',
+        name: 'Ecommerce Store',
+        description: 'Order Payment',
+        image: '/logo.png', // Update this with your brand's logo
+        order_id: result.orderId,
+        handler: async (response: {
+          razorpay_payment_id: string;
+          razorpay_order_id: string;
+          razorpay_signature: string;
+        }) => {
+          const verificationResult = await verifyPayment(response);
+
+          if (verificationResult.error) {
+            toast.error('Payment verification failed');
+            // router.push('/store/payment?status=failed');
+            return;
+          }
+
+          toast.success('Payment successful');
+          // router.push('/store/payment?status=success');
+        },
+        prefill: {
+          name: session?.user.name || session?.user.fullName || 'Guest',
+          email: session?.user.email || 'guest@example.com',
+          contact: session?.user.contact || '9999999999', // Replace with user contact if available
+        },
+        theme: {
+          color: '#3399cc',
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (error) {
+      toast.error('An error occurred while processing your payment.');
+    } finally {
+      setIsCreatingRazorpayOrder(false);
+    }
+  }
 
   if (!mounted) return <>Loading...</>;
 
@@ -252,7 +257,7 @@ const Form = () => {
                 <li>
                   <button
                     onClick={() => placeOrder()}
-                    disabled={isPlacing}
+                    disabled={isPlacing || isCreatingRazorpayOrder}
                     className='btn btn-primary w-full'
                   >
                     {isPlacing && (
