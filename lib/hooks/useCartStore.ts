@@ -27,6 +27,7 @@ const initialState: Cart = {
     address: '',
     city: '',
     postalCode: '',
+    state: '',
     country: '',
     email: '',
     contact: '',

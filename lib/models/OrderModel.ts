@@ -28,7 +28,21 @@ const orderSchema = new mongoose.Schema(
       city: { type: String, required: true },
       postalCode: { type: String, required: true },
       country: { type: String, required: true },
+      contact: { type: String, required: true },
+      email: { type: String, required: true },
+      state: { type: String, required: true },
     },
+    shipmentDetails: {
+      order_id: { type: Number },
+      shipment_id: { type: Number },
+      awb_number: { type: String },
+      courier_id: { type: String },
+      courier_name: { type: String },
+      status: { type: String },
+      additional_info: { type: String },
+      payment_type: { type: String },
+      label: { type: String },
+    },    
     paymentMethod: { type: String, required: true },
     paymentResult: {
       id: String,
@@ -65,7 +79,11 @@ export type Order = {
     city: string;
     postalCode: string;
     country: string;
+    contact: string;
+    email: string;
+    state: string;
   };
+  shipmentDetails?: ShipmentDetails;
   paymentMethod: string;
   paymentResult?: { id: string; status: string; email_address: string };
   itemsPrice: number;
@@ -93,8 +111,21 @@ export type ShippingAddress = {
   fullName: string;
   address: string;
   city: string;
+  state: string;
   postalCode: string;
   country: string;
   contact: string;
   email: string;
+};
+
+export type ShipmentDetails = {
+  order_id: number;
+  shipment_id: number;
+  awb_number: string;
+  courier_id: string;
+  courier_name: string;
+  status: string;
+  additional_info: string;
+  payment_type: string;
+  label: string;
 };

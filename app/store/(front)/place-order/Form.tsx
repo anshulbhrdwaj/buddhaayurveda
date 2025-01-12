@@ -12,6 +12,10 @@ import useCartService from '@/lib/hooks/useCartStore';
 import { createOrders, verifyPayment } from '@/lib/razorpay';
 import { useSession } from 'next-auth/react';
 
+interface LoginResponse {
+  token: string;
+}
+
 const Form = () => {
   const router = useRouter();
   const {
@@ -26,120 +30,207 @@ const Form = () => {
   } = useCartService();
 
   const { data: session } = useSession();
-  const [isCreatingRazorpayOrder, setIsCreatingRazorpayOrder] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  // mutate data in the backend by calling trigger function
-  const { trigger: placeOrder, isMutating: isPlacing } = useSWRMutation(
-    `/api/orders/mine`,
-    async (url) => {
-      const res = await fetch('/api/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          paymentMethod,
-          shippingAddress,
-          items,
-          itemsPrice,
-          taxPrice,
-          shippingPrice,
-          totalPrice,
-          user: { name: session?.user.fullName },
-        }),
-      });
-      const data = await res.json();
-      if (res.ok) {
+  const { trigger: placeOrder } = useSWRMutation(
+    '/api/orders/mine',
+    async () => {
+      try {
+        setIsProcessing(true);
+
+        // Step 1: Create Order
+        const orderData = await createOrder();
+        if (!orderData) throw new Error('Failed to create order.');
+
+        // Step 2: Create Razorpay Payment
+        const paymentResult = await createRazorpayOrder(orderData.order._id);
+        if (!paymentResult) throw new Error('Payment failed or canceled.');
+
+        // Step 3: Login Nimbus Post
+        const { token } = await loginNimbusPost();
+        if (!token) throw new Error('Login failed.');
+        console.log(token);
+
+        // Step 4: Create Shipment
+        const shipmentResult = await createShipment(orderData.order._id, token);
+        if (!shipmentResult) {
+          toast.error('Shipment creation failed, please contact support.');
+        } else {
+          toast.success('Order and shipment created successfully!');
+        }
+
+        // Clear cart and redirect to order details page
         clear();
-        createRazorpayOrder(data.order._id);
-        toast.success('Order placed successfully');
-        return router.push(`/store/order/${data.order._id}`);
-      } else {
-        toast.error(data.message);
+        router.push(`/store/order/${orderData.order._id}`);
+      } catch (error) {
+        handleError(error);
+      } finally {
+        setIsProcessing(false);
       }
     },
   );
 
   useEffect(() => {
-    if (!paymentMethod) {
-      return router.push('/store/payment');
+    if (!paymentMethod) return router.push('/store/payment');
+    if (items.length === 0) return router.push('/store');
+  }, [paymentMethod, items, router]);
+
+  // Modularized Functions
+  const createOrder = async () => {
+    const response = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        paymentMethod,
+        shippingAddress,
+        items,
+        itemsPrice,
+        taxPrice,
+        shippingPrice,
+        totalPrice,
+        user: { name: session?.user.fullName },
+      }),
+    });
+
+    if (!response.ok) {
+      const { message } = await response.json();
+      throw new Error(message || 'Failed to create order.');
     }
-    if (items.length === 0) {
-      return router.push('/store');
+
+    return response.json();
+  };
+
+  const createRazorpayOrder = async (orderId: string) => {
+    try {
+      await loadRazorpayScript('https://checkout.razorpay.com/v1/checkout.js');
+      const result = await createOrders({ orderId });
+
+      if (result.error) {
+        toast.error('Error creating Razorpay order.');
+        return null;
+      }
+
+      return new Promise((resolve, reject) => {
+        const options = {
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+          amount: totalPrice * 100, // Convert to paise
+          currency: 'INR',
+          name: 'Ecommerce Store',
+          description: 'Order Payment',
+          order_id: result.orderId,
+          handler: async (response: any) => {
+            const verifyResult = await verifyPayment(response);
+            if (verifyResult.error) {
+              reject('Payment verification failed.');
+            } else {
+              resolve(true);
+            }
+          },
+          prefill: {
+            name: session?.user.name || 'Guest',
+            email: session?.user.email || 'guest@example.com',
+            contact: session?.user.contact || '9999999999',
+          },
+          theme: { color: '#3399cc' },
+        };
+
+        const rzp = new (window as any).Razorpay(options);
+        rzp.on('payment.failed', () => reject('Payment failed.'));
+        rzp.open();
+      });
+    } catch (error) {
+      console.error('Razorpay error:', error);
+      throw new Error('An error occurred with Razorpay.');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paymentMethod, router]);
+  };
+
+  const loginNimbusPost = async (): Promise<LoginResponse> => {
+    try {
+      const res = await fetch('/api/nimbuspost/login', {
+        method: 'POST', // Change GET to POST
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}), // Empty body since you're using environment variables for the credentials
+      });
+
+      const data = await res.json();
+
+      return data; // Return the data variable
+    } catch (error) {
+      return Promise.reject(error); // Return a rejected promise with an error message
+    }
+  };
+
+  const createShipment = async (orderId: string, token: string) => {
+    const response = await fetch('/api/nimbuspost/create-shipment', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        shipmentData: {
+          order_number: orderId,
+          payment_type: paymentMethod === 'COD' ? 'cod' : 'prepaid',
+          order_amount: totalPrice,
+          // package_weight: 500, // Example weight, update dynamically
+          consignee: {
+            name: shippingAddress.fullName,
+            address: shippingAddress.address,
+            city: shippingAddress.city,
+            state: shippingAddress.state,
+            pincode: shippingAddress.postalCode,
+            phone: shippingAddress.contact,
+          },
+          pickup: {
+            warehouse_name: 'Warehouse 1',
+            name: 'John Doe',
+            address: 'Pickup Address Line 1',
+            city: 'Pickup City',
+            state: 'Pickup State',
+            pincode: '123456',
+            phone: '9876543210',
+          },
+          order_items: items.map((item) => ({
+            name: item.name,
+            qty: item.qty,
+            price: item.price,
+            // sku: item.sku,
+          })),
+        },
+        token,
+      }),
+    });
+
+    if (!response.ok) {
+      const { error } = await response.json();
+      throw new Error(error || 'Failed to create shipment.');
+    }
+
+    return response.json();
+  };
+
+  const loadRazorpayScript = (src: string) =>
+    new Promise<void>((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = true;
+      script.onload = () => resolve();
+      script.onerror = () =>
+        reject(new Error('Failed to load Razorpay script.'));
+      document.body.appendChild(script);
+    });
+
+  const handleError = (error: any) => {
+    console.error('Error:', error);
+    toast.error(error.message || 'An unexpected error occurred.');
+  };
 
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  async function loadRazorpayScript(src: string) {
-    return new Promise((resolve) => {
-      const script = document.createElement('script');
-      script.src = src;
-      script.async = true;
-      script.onload = resolve;
-      document.body.appendChild(script);
-    });
-  }
-
-  async function createRazorpayOrder(orderId: string) {
-    setIsCreatingRazorpayOrder(true);
-    try {
-      await loadRazorpayScript('https://checkout.razorpay.com/v1/checkout.js');
-
-      const result = await createOrders({ orderId });
-
-      if (result.error) {
-        toast.error('Error creating order');
-        return;
-      }
-
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
-        amount: totalPrice * 100, // Assuming totalPrice is in INR
-        currency: 'INR',
-        name: 'Ecommerce Store',
-        description: 'Order Payment',
-        image: '/logo.png', // Update this with your brand's logo
-        order_id: result.orderId,
-        handler: async (response: {
-          razorpay_payment_id: string;
-          razorpay_order_id: string;
-          razorpay_signature: string;
-        }) => {
-          const verificationResult = await verifyPayment(response);
-
-          if (verificationResult.error) {
-            toast.error('Payment verification failed');
-            // router.push('/store/payment?status=failed');
-            return;
-          }
-
-          toast.success('Payment successful');
-          // router.push('/store/payment?status=success');
-        },
-        prefill: {
-          name: session?.user.name || session?.user.fullName || 'Guest',
-          email: session?.user.email || 'guest@example.com',
-          contact: session?.user.contact || '9999999999', // Replace with user contact if available
-        },
-        theme: {
-          color: '#3399cc',
-        },
-      };
-
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
-    } catch (error) {
-      toast.error('An error occurred while processing your payment.');
-    } finally {
-      setIsCreatingRazorpayOrder(false);
-    }
-  }
 
   if (!mounted) return <>Loading...</>;
 
@@ -257,10 +348,10 @@ const Form = () => {
                 <li>
                   <button
                     onClick={() => placeOrder()}
-                    disabled={isPlacing || isCreatingRazorpayOrder}
+                    disabled={isProcessing}
                     className='btn btn-primary w-full'
                   >
-                    {isPlacing && (
+                    {isProcessing && (
                       <span className='loading loading-spinner'></span>
                     )}
                     Place Order

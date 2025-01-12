@@ -27,6 +27,7 @@ const Form = () => {
       fullName: '',
       address: '',
       city: '',
+      state: '',
       postalCode: '',
       country: '',
       contact: '',
@@ -42,6 +43,7 @@ const Form = () => {
     setValue('country', shippingAddress.country);
     setValue('contact', shippingAddress.contact);
     setValue('email', shippingAddress.email);
+    setValue('state', shippingAddress.state);
   }, [setValue, shippingAddress]);
 
   const { data: session } = useSession();
@@ -133,6 +135,7 @@ const Form = () => {
             <FormInput name='Full Name' id='fullName' required />
             <FormInput name='Address' id='address' required />
             <FormInput name='City' id='city' required />
+            <FormInput name='State' id='state' required />
             <FormInput name='Postal Code' id='postalCode' required />
             <FormInput name='Country' id='country' required />
             <FormInput name='Contact' id='contact' required />
