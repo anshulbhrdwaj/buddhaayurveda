@@ -12,12 +12,10 @@ export const POST = auth(async (request: any) => {
   }
 
   try {
-    const data = await request.json();
-
-    console.log(data);
+    const {shipmentData, token} = await request.json();
 
     // Validate request payload
-    if (!data.shipmentData.order_number) {
+    if (!shipmentData.order_number) {
       return NextResponse.json(
         { success: false, message: 'Missing required fields: order_number' },
         { status: 400 },
@@ -25,7 +23,7 @@ export const POST = auth(async (request: any) => {
     }
 
     // Ensure the order exists in the database
-    const order = await OrderModel.findById(data.shipmentData.order_number);
+    const order = await OrderModel.findById(shipmentData.order_number);
     if (!order) {
       return NextResponse.json(
         { success: false, message: 'Order not found' },
@@ -37,10 +35,10 @@ export const POST = auth(async (request: any) => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
 
-    const response = await nimbuspost.post('shipments/', data.shipmentData, {
+    const response = await nimbuspost.post('shipments/', shipmentData, {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${data.token}`,
+        Authorization: `Bearer ${token}`,
       },
       signal: controller.signal,
     });

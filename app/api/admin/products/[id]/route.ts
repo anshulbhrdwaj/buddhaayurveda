@@ -47,6 +47,10 @@ export const PUT = auth(async (...args: any) => {
     description,
     rating,
     numReviews,
+    weight,
+    length,
+    breadth,
+    height,
   } = await req.json();
 
   try {
@@ -64,6 +68,10 @@ export const PUT = auth(async (...args: any) => {
       product.description = description;
       product.rating = rating;
       product.numReviews = numReviews;
+      product.weight = weight;
+      product.length = length;
+      product.breadth = breadth;
+      product.height = height;
 
       const updatedProduct = await product.save();
       return Response.json(updatedProduct);

@@ -24,7 +24,6 @@ export const POST = auth(async (request: any) => {
   }
 });
 
-
 // {
 //   "status": true,
 //   "data": {

@@ -50,11 +50,11 @@ const Form = () => {
 
   let callbackUrl = '/store/payment';
 
-  useEffect(() => {
-    if (session && session.user) {
-      router.push(callbackUrl);
-    }
-  }, [callbackUrl, router, session, params]);
+  // useEffect(() => {
+  //   if (session && session.user) {
+  //     router.push(callbackUrl);
+  //   }
+  // }, [callbackUrl, router, session, params]);
 
   const formSubmit: SubmitHandler<ShippingAddress> = async (form) => {
     const { fullName, email, contact } = form;

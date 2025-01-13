@@ -66,3 +66,30 @@ async function handleResponse(response: any) {
   const errorMessage = await response.text();
   throw new Error(errorMessage);
 }
+
+
+
+// function createPayPalOrder() {
+//   return fetch(`/api/orders/${orderId}/create-paypal-order`, {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//     },
+//   })
+//     .then((response) => response.json())
+//     .then((order) => order.id);
+// }
+
+// function onApprovePayPalOrder(data: any) {
+//   return fetch(`/api/orders/${orderId}/capture-paypal-order`, {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//     },
+//     body: JSON.stringify(data),
+//   })
+//     .then((response) => response.json())
+//     .then((orderData) => {
+//       toast.success('Order paid successfully');
+//     });
+// }

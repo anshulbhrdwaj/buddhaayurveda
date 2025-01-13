@@ -6,13 +6,21 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { useState, useTransition } from 'react';
+import { useEffect, useLayoutEffect, useState, useTransition } from 'react';
 import toast from 'react-hot-toast';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
-import { OrderItem } from '@/lib/models/OrderModel';
+import {
+  ILatestStatus,
+  Order,
+  OrderItem,
+  ShipmentDetails,
+  ShipmentTrackingDetails,
+  statusInterpreter,
+} from '@/lib/models/OrderModel';
 import { createOrders, verifyPayment } from '@/lib/razorpay';
+import { nimbuspost } from '@/lib/nimbuspost';
 
 interface IOrderDetails {
   orderId: string;
@@ -24,7 +32,9 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
   const [loading, startTransition] = useTransition();
   const router = useRouter();
   const [isCreatingRazorpayOrder, setIsCreatingRazorpayOrder] = useState(false);
-
+  const [shipmentTrackingData, setShipmentTrackingData] =
+    useState<ShipmentTrackingDetails | null>(null);
+  const [latestStatus, setLatestStatus] = useState<ILatestStatus | null>(null);
   const { trigger: deliverOrder, isMutating: isDelivering } = useSWRMutation(
     `/api/orders/${orderId}`,
     async (url) => {
@@ -41,35 +51,7 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
     },
   );
 
-  function createPayPalOrder() {
-    return fetch(`/api/orders/${orderId}/create-paypal-order`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((response) => response.json())
-      .then((order) => order.id);
-  }
-
-  function onApprovePayPalOrder(data: any) {
-    return fetch(`/api/orders/${orderId}/capture-paypal-order`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-      .then((response) => response.json())
-      .then((orderData) => {
-        toast.success('Order paid successfully');
-      });
-  }
-
   const { data, error } = useSWR(`/api/orders/${orderId}`);
-
-  if (error) return error.message;
-  if (!data) return 'Loading...';
 
   const {
     paymentMethod,
@@ -83,7 +65,11 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
     deliveredAt,
     isPaid,
     paidAt,
-  } = data;
+  } = (data as Order) || {};
+
+  useLayoutEffect(() => {
+    trackShipment();
+  }, []);
 
   async function loadRazorpayScript(src: string) {
     return new Promise((resolve) => {
@@ -150,69 +136,30 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
     }
   }
 
-  // async function createRazorpayOrder() {
-  //   try {
-  //     // Call API to create Razorpay order
-  //     const res = await fetch(`/api/orders/${orderId}/create-razorpay-order`, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //     });
+  async function trackShipment() {
+    const awb = data?.shipmentDetails?.awb_number;
 
-  //     const result = await res.json();
+    if (!awb) {
+      toast.error('Shipment not found');
+      return;
+    }
 
-  //     if (result.error) {
-  //       toast.error('Error creating order');
-  //       return;
-  //     }
+    try {
+      const response = await nimbuspost.get(`/shipments/track/${awb}/`);
+      const shipmentResponse = response.data.data as ShipmentTrackingDetails;
+      setShipmentTrackingData(shipmentResponse);
+      const currentStatus = shipmentResponse.history[
+        shipmentResponse.history.length - 1
+      ] as ILatestStatus;
+      setLatestStatus(currentStatus);
+      currentStatus.status_code === 'DL' && deliverOrder();
+    } catch (error) {
+      toast.error('Failed to track shipment');
+    }
+  }
 
-  //     const options = {
-  //       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
-  //       amount: totalPrice * 100, // Assuming totalPrice is in INR
-  //       currency: 'INR',
-  //       name: 'Ecommerce Store',
-  //       description: 'Order Payment',
-  //       image: '/logo.png', // Update with your brand's logo
-  //       order_id: result.orderId,
-  //       handler: async (response: any) => {
-  //         const paymentVerificationRes = await fetch(
-  //           `/api/orders/${orderId}/verify-razorpay-payment`,
-  //           {
-  //             method: 'POST',
-  //             headers: {
-  //               'Content-Type': 'application/json',
-  //             },
-  //             body: JSON.stringify(response),
-  //           }
-  //         );
-
-  //         const verificationResult = await paymentVerificationRes.json();
-
-  //         if (verificationResult.error) {
-  //           toast.error('Payment verification failed');
-  //           return;
-  //         }
-
-  //         toast.success('Payment successful');
-  //         // router.push('/store/payment?status=success');
-  //       },
-  //       prefill: {
-  //         name: shippingAddress.fullName || 'Guest',
-  //         email: shippingAddress.email || 'guest@example.com',
-  //         contact: shippingAddress.contact || '9999999999',
-  //       },
-  //       theme: {
-  //         color: '#3399cc',
-  //       },
-  //     };
-
-  //     const rzp = new (window as any).Razorpay(options);
-  //     rzp.open();
-  //   } catch (error) {
-  //     toast.error('An error occurred while processing your payment.');
-  //   }
-  // }
+  if (error) return error.message;
+  if (!data) return 'Loading...';
 
   return (
     <div>
@@ -240,9 +187,31 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
 
           <div className='card mt-4 bg-base-300'>
             <div className='card-body'>
+              <h2 className='card-title'>Shipment Details</h2>
+              <p>{latestStatus ? 'Status' : 'Shipment not found'}</p>
+              {latestStatus ? (
+                <div className='text-success'>
+                  {statusInterpreter(latestStatus.status_code)}
+                </div>
+              ) : (
+                <div className='text-error'>Contact Support </div>
+              )}
+              {latestStatus && <p>Currently at</p>}
+              {latestStatus ? (
+                <div className='text-success'>
+                  {`${latestStatus.location} ${latestStatus.event_time} ${latestStatus.message}`}
+                </div>
+              ) : (
+                <div className='text-error'>{'+91 1234567890'} </div>
+              )}
+            </div>
+          </div>
+
+          <div className='card mt-4 bg-base-300'>
+            <div className='card-body'>
               <h2 className='card-title'>Payment Method</h2>
               <p>{paymentMethod}</p>
-              {isPaid ? (
+              {isPaid && isDelivered ? (
                 <div className='text-success'>
                   Paid at {moment(paidAt).format('MMMM Do YYYY, h:mm:ss a')}
                 </div>
@@ -321,8 +290,17 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
                     <div>₹{totalPrice}</div>
                   </div>
                 </li>
+                {/* <li>
+                  <button
+                    className='btn my-2 w-full'
+                    // onClick={createRazorpayOrder}
+                    // disabled={}
+                  >
+                    Track Order
+                  </button>
+                </li> */}
 
-                {!isPaid && paymentMethod === 'PayPal' && (
+                {/* {!isPaid && paymentMethod === 'PayPal' && (
                   <li>
                     <PayPalScriptProvider
                       options={{ clientId: paypalClientId }}
@@ -333,7 +311,8 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
                       />
                     </PayPalScriptProvider>
                   </li>
-                )}
+                )} */}
+
                 {paymentMethod === 'Razorpay' && !isPaid && (
                   <li>
                     <button

@@ -48,8 +48,7 @@ const Form = () => {
 
         // Step 3: Login Nimbus Post
         const { token } = await loginNimbusPost();
-        if (!token) throw new Error('Login failed.');
-        console.log(token);
+        if (!token) throw new Error('Shipment connection failed.');
 
         // Step 4: Create Shipment
         const shipmentResult = await createShipment(orderData.order._id, token);
@@ -75,7 +74,6 @@ const Form = () => {
     if (items.length === 0) return router.push('/store');
   }, [paymentMethod, items, router]);
 
-  // Modularized Functions
   const createOrder = async () => {
     const response = await fetch('/api/orders', {
       method: 'POST',
@@ -173,7 +171,19 @@ const Form = () => {
           order_number: orderId,
           payment_type: paymentMethod === 'COD' ? 'cod' : 'prepaid',
           order_amount: totalPrice,
-          // package_weight: 500, // Example weight, update dynamically
+          package_weight: items.reduce((total, item) => total + item.weight, 0),
+          package_height: items.reduce(
+            (total, item) => total + parseFloat(item.height),
+            0,
+          ),
+          package_breadth: items.reduce(
+            (total, item) => total + parseFloat(item.breadth),
+            0,
+          ),
+          package_length: items.reduce(
+            (total, item) => total + parseFloat(item.length),
+            0,
+          ),
           consignee: {
             name: shippingAddress.fullName,
             address: shippingAddress.address,
@@ -183,19 +193,19 @@ const Form = () => {
             phone: shippingAddress.contact,
           },
           pickup: {
-            warehouse_name: 'Warehouse 1',
-            name: 'John Doe',
-            address: 'Pickup Address Line 1',
-            city: 'Pickup City',
-            state: 'Pickup State',
-            pincode: '123456',
-            phone: '9876543210',
+            warehouse_name: 'VPO GHARWAL',
+            name: 'VPO GHARWAL ',
+            address: 'DIST SONIPET',
+            city: 'TEH. Gohana',
+            state: 'Haryana',
+            pincode: '131302',
+            phone: '9416643437',
           },
           order_items: items.map((item) => ({
             name: item.name,
             qty: item.qty,
             price: item.price,
-            // sku: item.sku,
+            sku: "Buddha Ayurveda's " + item.slug,
           })),
         },
         token,
@@ -207,7 +217,18 @@ const Form = () => {
       throw new Error(error || 'Failed to create shipment.');
     }
 
-    return response.json();
+    const data = await response.json();
+
+    console.log(data);
+
+    if (!data.data?.status) {
+      const {
+        data: { message },
+      } = data;
+      throw new Error(message || 'Failed to create shipment.');
+    }
+
+    return data;
   };
 
   const loadRazorpayScript = (src: string) =>

@@ -42,7 +42,7 @@ const orderSchema = new mongoose.Schema(
       additional_info: { type: String },
       payment_type: { type: String },
       label: { type: String },
-    },    
+    },
     paymentMethod: { type: String, required: true },
     paymentResult: {
       id: String,
@@ -64,7 +64,7 @@ const orderSchema = new mongoose.Schema(
 );
 
 const OrderModel =
-  mongoose.models.Order || mongoose.model('Order', orderSchema);
+  mongoose.models?.Order || mongoose.model('Order', orderSchema);
 
 export default OrderModel;
 
@@ -105,6 +105,10 @@ export type OrderItem = {
   price: number;
   color: string;
   size: string;
+  height: string;
+  breadth: string;
+  length: string;
+  weight: number;
 };
 
 export type ShippingAddress = {
@@ -129,3 +133,49 @@ export type ShipmentDetails = {
   payment_type: string;
   label: string;
 };
+
+export type ShipmentTrackingDetails = {
+  id: string;
+  order_id: string;
+  order_number: string;
+  created: string;
+  awb_number: string;
+  rto_awb: string;
+  courier_id: string;
+  warehouse_id: string;
+  rto_warehouse_id: string;
+  status: string;
+  rto_status: string;
+  shipment_info: string;
+  history: ILatestStatus[];
+};
+
+export interface ILatestStatus {
+  status_code: string;
+  location: string;
+  event_time: string;
+  message: string;
+}
+
+export function statusInterpreter(status_code: string): string {
+  switch (status_code) {
+    case 'PP':
+      return 'Pending Pickup';
+    case 'IT':
+      return 'In Transit';
+    case 'EX':
+      return 'Exception';
+    case 'OFD':
+      return 'Out For Delivery';
+    case 'DL':
+      return 'Delivered';
+    case 'RT':
+      return 'RTO';
+    case 'RT-IT':
+      return 'RTO In Transit';
+    case 'RT-DL':
+      return 'RTO Delivered';
+    default:
+      return 'Unknown Status';
+  }
+}

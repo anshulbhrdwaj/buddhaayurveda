@@ -8,6 +8,10 @@ export type Product = {
   banner?: string;
   price: number;
   brand: string;
+  weight: number;
+  length: number;
+  breadth: number;
+  height: number;
   description: string;
   category: string;
   rating: number;
@@ -25,6 +29,10 @@ const productSchema = new mongoose.Schema(
     image: { type: String, required: true },
     price: { type: Number, required: true },
     brand: { type: String, required: true },
+    weight: { type: Number, required: true },
+    length: { type: Number, required: true },
+    breadth: { type: Number, required: true },
+    height: { type: Number, required: true },
     rating: { type: Number, required: true, default: 0 },
     numReviews: { type: Number, required: true, default: 0 },
     countInStock: { type: Number, required: true, default: 0 },

@@ -42,11 +42,15 @@ export default function ProductEditForm({ productId }: { productId: string }) {
   useEffect(() => {
     if (!product) return;
     setValue('name', product.name);
-    setValue('slug', product.slug);
+    setValue('slug', product.slug.replace(/\s+/g, '-').toLowerCase());
     setValue('price', product.price);
     setValue('image', product.image);
     setValue('category', product.category);
     setValue('brand', product.brand);
+    setValue('weight', product.weight);
+    setValue('height', product.height);
+    setValue('length', product.length);
+    setValue('breadth', product.breadth);
     setValue('countInStock', product.countInStock);
     setValue('description', product.description);
     setValue('rating', product.rating);
@@ -150,6 +154,10 @@ export default function ProductEditForm({ productId }: { productId: string }) {
           <FormInput name='Price' id='price' required />
           <FormInput name='Category' id='category' required />
           <FormInput name='Brand' id='brand' required />
+          <FormInput name='Weight (gm)' id='weight' required />
+          <FormInput name='Length (cm)' id='length' required />
+          <FormInput name='Breadth (cm)' id='breadth' required />
+          <FormInput name='Height (cm)' id='height' required />
           <FormInput name='Description' id='description' required />
           <FormInput name='Count In Stock' id='countInStock' required />
 
