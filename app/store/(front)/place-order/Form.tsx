@@ -11,6 +11,7 @@ import CheckoutSteps from '@/components/checkout/CheckoutSteps';
 import useCartService from '@/lib/hooks/useCartStore';
 import { createOrders, verifyPayment } from '@/lib/razorpay';
 import { useSession } from 'next-auth/react';
+import { company } from '@/lib/landingData';
 
 interface LoginResponse {
   token: string;
@@ -43,8 +44,10 @@ const Form = () => {
         if (!orderData) throw new Error('Failed to create order.');
 
         // Step 2: Create Razorpay Payment
-        const paymentResult = await createRazorpayOrder(orderData.order._id);
-        if (!paymentResult) throw new Error('Payment failed or canceled.');
+        if (paymentMethod === 'Razorpay') {
+          const paymentResult = await createRazorpayOrder(orderData.order._id);
+          if (!paymentResult) throw new Error('Payment failed or canceled.');
+        }
 
         // Step 3: Login Nimbus Post
         const { token } = await loginNimbusPost();
@@ -113,7 +116,7 @@ const Form = () => {
           key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
           amount: totalPrice * 100, // Convert to paise
           currency: 'INR',
-          name: 'Ecommerce Store',
+          name: 'Buddha Ayurveda',
           description: 'Order Payment',
           order_id: result.orderId,
           handler: async (response: any) => {
@@ -169,7 +172,7 @@ const Form = () => {
       body: JSON.stringify({
         shipmentData: {
           order_number: orderId,
-          payment_type: paymentMethod === 'COD' ? 'cod' : 'prepaid',
+          payment_type: paymentMethod === 'COD' || 'cod' ? 'cod' : 'prepaid',
           order_amount: totalPrice,
           package_weight: items.reduce((total, item) => total + item.weight, 0),
           package_height: items.reduce(
@@ -195,11 +198,11 @@ const Form = () => {
           pickup: {
             warehouse_name: 'VPO GHARWAL',
             name: 'VPO GHARWAL ',
-            address: 'DIST SONIPET',
-            city: 'TEH. Gohana',
-            state: 'Haryana',
-            pincode: '131302',
-            phone: '9416643437',
+            address: company.address,
+            city: company.city,
+            state: company.state,
+            pincode: company.zip,
+            phone: company.phone,
           },
           order_items: items.map((item) => ({
             name: item.name,
@@ -219,14 +222,14 @@ const Form = () => {
 
     const data = await response.json();
 
-    console.log(data);
+    // console.log(data);
 
-    if (!data.data?.status) {
-      const {
-        data: { message },
-      } = data;
-      throw new Error(message || 'Failed to create shipment.');
-    }
+    // if (!data.data?.status) {
+    //   const {
+    //     data: { message },
+    //   } = data;
+    //   throw new Error(message || 'Failed to create shipment.');
+    // }
 
     return data;
   };

@@ -86,14 +86,14 @@ export const FooterSection = () => {
 
 					<div className="flex flex-col gap-2">
 						<h3 className="font-bold text-lg">Socials</h3>
-						<div>
+						{/* <div>
 							<Link
 								href={company.facebook}
 								className="opacity-60 hover:opacity-100"
 							>
 								Facebook
 							</Link>
-						</div>
+						</div> */}
 
 						<div>
 							<Link

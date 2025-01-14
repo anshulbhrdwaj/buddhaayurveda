@@ -21,6 +21,7 @@ import {
 } from '@/lib/models/OrderModel';
 import { createOrders, verifyPayment } from '@/lib/razorpay';
 import { nimbuspost } from '@/lib/nimbuspost';
+import { company } from '@/lib/landingData';
 
 interface IOrderDetails {
   orderId: string;
@@ -140,7 +141,7 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
     const awb = data?.shipmentDetails?.awb_number;
 
     if (!awb) {
-      toast.error('Shipment not found');
+      console.error('Shipment not found');
       return;
     }
 
@@ -154,7 +155,7 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
       setLatestStatus(currentStatus);
       currentStatus.status_code === 'DL' && deliverOrder();
     } catch (error) {
-      toast.error('Failed to track shipment');
+      console.error('Failed to track shipment');
     }
   }
 
@@ -202,7 +203,7 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
                   {`${latestStatus.location} ${latestStatus.event_time} ${latestStatus.message}`}
                 </div>
               ) : (
-                <div className='text-error'>{'+91 1234567890'} </div>
+                <div className='text-error'>{company.phone} </div>
               )}
             </div>
           </div>
