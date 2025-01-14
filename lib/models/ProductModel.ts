@@ -7,6 +7,7 @@ export type Product = {
   image: string;
   banner?: string;
   price: number;
+  codCharge: number;
   brand: string;
   weight: number;
   length: number;
@@ -28,6 +29,7 @@ const productSchema = new mongoose.Schema(
     category: { type: String, required: true },
     image: { type: String, required: true },
     price: { type: Number, required: true },
+    codCharge: { type: Number, required: true },
     brand: { type: String, required: true },
     weight: { type: Number, required: true },
     length: { type: Number, required: true },

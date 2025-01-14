@@ -59,7 +59,7 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
     shippingAddress,
     items,
     itemsPrice,
-    taxPrice,
+    codCharge,
     shippingPrice,
     totalPrice,
     isDelivered,
@@ -275,8 +275,8 @@ const OrderDetails = ({ orderId, paypalClientId }: IOrderDetails) => {
                 </li>
                 <li>
                   <div className='mb-2 flex justify-between'>
-                    <div>Tax</div>
-                    <div>₹{taxPrice}</div>
+                    <div>Cod Charge</div>
+                    <div>₹{codCharge}</div>
                   </div>
                 </li>
                 <li>

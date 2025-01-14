@@ -12,10 +12,12 @@ const calcPrices = (orderItems: OrderItem[]) => {
   // Calculate the shipping price
   const shippingPrice = round2(itemsPrice > 100 ? 0 : 10);
   // Calculate the tax price
-  const taxPrice = round2(Number((0.15 * itemsPrice).toFixed(2)));
+  const codCharge = round2(
+    orderItems.reduce((acc, item) => acc + item.codCharge, 0),
+  );
   // Calculate the total price
-  const totalPrice = round2(itemsPrice + shippingPrice + taxPrice);
-  return { itemsPrice, shippingPrice, taxPrice, totalPrice };
+  const totalPrice = round2(itemsPrice + shippingPrice + codCharge);
+  return { itemsPrice, shippingPrice, codCharge, totalPrice };
 };
 
 export const POST = auth(async (req: any) => {
@@ -45,13 +47,13 @@ export const POST = auth(async (req: any) => {
       _id: undefined,
     }));
 
-    const { itemsPrice, taxPrice, shippingPrice, totalPrice } =
+    const { itemsPrice, codCharge, shippingPrice, totalPrice } =
       calcPrices(dbOrderItems);
 
     const newOrder = new OrderModel({
       items: dbOrderItems,
       itemsPrice,
-      taxPrice,
+      codCharge,
       shippingPrice,
       totalPrice,
       shippingAddress: payload.shippingAddress,

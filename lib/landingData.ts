@@ -5,7 +5,7 @@ export const company = {
   facebook: 'https://www.facebook.com/budhhaayurveda/',
   whatsapp: 'https://wa.me/8930100340',
   email: 'buddhaayurveda@gmail.com',
-  phone: '+91 8930100340',
+  phone: '8930100340',
   website: 'www.buddhaayurveda.com',
   address: 'DIST SONIPET, TEH. Gohana, Haryana, India',
   city: 'TEH. Gohana',

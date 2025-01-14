@@ -44,6 +44,7 @@ export default function ProductEditForm({ productId }: { productId: string }) {
     setValue('name', product.name);
     setValue('slug', product.slug.replace(/\s+/g, '-').toLowerCase());
     setValue('price', product.price);
+    setValue('codCharge', product.codCharge);
     setValue('image', product.image);
     setValue('category', product.category);
     setValue('brand', product.brand);
@@ -152,6 +153,7 @@ export default function ProductEditForm({ productId }: { productId: string }) {
             </div>
           </div>
           <FormInput name='Price' id='price' required />
+          <FormInput name='Cod Charge' id='codCharge' required />
           <FormInput name='Category' id='category' required />
           <FormInput name='Brand' id='brand' required />
           <FormInput name='Weight (gm)' id='weight' required />

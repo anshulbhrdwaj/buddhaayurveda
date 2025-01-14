@@ -52,6 +52,8 @@ export const POST = auth(async (request: any) => {
     order.shipmentDetails = response.data;
     await order.save();
 
+    console.log(response.data)
+
     return NextResponse.json({
       success: true,
       message: 'Shipment created successfully',

@@ -15,6 +15,11 @@ const MyOrders = () => {
   if (isLoading) return <>Loading...</>;
   if (!orders) return <>No orders...</>;
 
+  // Sort orders by creation date, latest first
+  const sortedOrders = [...orders].sort(
+    (a: Order, b: Order) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
   return (
     <div className='overflow-x-auto'>
       <table className='table'>
@@ -29,7 +34,7 @@ const MyOrders = () => {
           </tr>
         </thead>
         <tbody>
-          {orders.map((order: Order) => (
+          {sortedOrders.map((order: Order) => (
             <tr key={order._id}>
               <td>{order._id.substring(20, 24)}</td>
               <td className='whitespace-nowrap'>

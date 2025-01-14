@@ -10,7 +10,7 @@ const Form = () => {
   const router = useRouter();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
 
-  const { savePaymentMethod, paymentMethod, shippingAddress } =
+  const { codCharge, savePaymentMethod, paymentMethod, shippingAddress } =
     useCartService();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -33,10 +33,10 @@ const Form = () => {
         <div className='card-body'>
           <h1 className='card-title'>Payment Method</h1>
           <form onSubmit={handleSubmit}>
-            {['Razorpay', 'CashOnDelivery'].map((payment) => (
+            {['Razorpay', 'Cash On Delivery'].map((payment, index) => (
               <div key={payment}>
                 <label className='label cursor-pointer'>
-                  <span className='label-text'>{payment}</span>
+                  <span className='label-text'>{payment}{index === 1 && ` (Extra ₹${codCharge})`}</span>
                   <input
                     type='radio'
                     name='paymentMethod'

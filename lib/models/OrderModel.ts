@@ -20,6 +20,7 @@ const orderSchema = new mongoose.Schema(
         qty: { type: Number, required: true },
         image: { type: String, required: true },
         price: { type: Number, required: true },
+        codCharge: { type: Number, required: true },
       },
     ],
     shippingAddress: {
@@ -51,7 +52,7 @@ const orderSchema = new mongoose.Schema(
     },
     itemsPrice: { type: Number, required: true },
     shippingPrice: { type: Number, required: true },
-    taxPrice: { type: Number, required: true },
+    codCharge: { type: Number, required: true },
     totalPrice: { type: Number, required: true },
     isPaid: { type: Boolean, required: true, default: false },
     isDelivered: { type: Boolean, required: true, default: false },
@@ -88,7 +89,7 @@ export type Order = {
   paymentResult?: { id: string; status: string; email_address: string };
   itemsPrice: number;
   shippingPrice: number;
-  taxPrice: number;
+  codCharge: number;
   totalPrice: number;
   isPaid: boolean;
   isDelivered: boolean;
@@ -103,6 +104,7 @@ export type OrderItem = {
   qty: number;
   image: string;
   price: number;
+  codCharge: number;
   color: string;
   size: string;
   height: string;

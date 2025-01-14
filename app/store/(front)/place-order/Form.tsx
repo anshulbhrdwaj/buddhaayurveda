@@ -24,7 +24,7 @@ const Form = () => {
     shippingAddress,
     items,
     itemsPrice,
-    taxPrice,
+    codCharge,
     shippingPrice,
     totalPrice,
     clear,
@@ -86,7 +86,7 @@ const Form = () => {
         shippingAddress,
         items,
         itemsPrice,
-        taxPrice,
+        codCharge,
         shippingPrice,
         totalPrice,
         user: { name: session?.user.fullName },
@@ -174,7 +174,7 @@ const Form = () => {
           order_number: orderId,
           payment_type: paymentMethod === 'COD' || 'cod' ? 'cod' : 'prepaid',
           order_amount: totalPrice,
-          package_weight: items.reduce((total, item) => total + item.weight, 0),
+          package_weight: items.reduce((total, item) => total + item.weight * item.qty, 0),
           package_height: items.reduce(
             (total, item) => total + parseFloat(item.height),
             0,
@@ -352,8 +352,8 @@ const Form = () => {
                 </li>
                 <li>
                   <div className=' flex justify-between'>
-                    <div>Tax</div>
-                    <div>₹{taxPrice}</div>
+                    <div>Cod Charge</div>
+                    <div>₹{codCharge}</div>
                   </div>
                 </li>
                 <li>
