@@ -58,39 +58,43 @@ const Form = () => {
 
   const formSubmit: SubmitHandler<ShippingAddress> = async (form) => {
     const { fullName, email, contact } = form;
-    try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          fullName,
-          email,
-          contact,
-        }),
-      });
-      if (res.ok) {
-        // return router.push(
-        //   `/store/signin?callbackUrl=${callbackUrl}&success=User has been created`,
-        // );
-        signIn('credentials', {
-          email,
-          password: null,
-          callbackUrl,
+
+    if (!session) {
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fullName,
+            email,
+            contact,
+          }),
         });
-        toast.success('User has been created');
-      } else {
-        const data = await res.json();
-        throw new Error(data.message);
+        if (res.ok) {
+          // return router.push(
+          //   `/store/signin?callbackUrl=${callbackUrl}&success=User has been created`,
+          // );
+          signIn('credentials', {
+            email,
+            password: null,
+            callbackUrl,
+          });
+          toast.success('User has been created');
+        } else {
+          const data = await res.json();
+          throw new Error(data.message);
+        }
+      } catch (err: any) {
+        const error =
+          err.message && err.message.indexOf('E11000') === 0
+            ? signIn('credentials', { email, password: null, callbackUrl })
+            : err.message;
+        error && toast.error(error || 'error');
       }
-    } catch (err: any) {
-      const error =
-        err.message && err.message.indexOf('E11000') === 0
-          ? signIn('credentials', { email, password: null, callbackUrl })
-          : err.message;
-      error && toast.error(error || 'error');
     }
+
     saveShippingAddress(form);
     router.push('/store/payment');
   };
