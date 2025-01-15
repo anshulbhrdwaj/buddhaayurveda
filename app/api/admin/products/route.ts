@@ -32,6 +32,11 @@ export const POST = auth(async (req: any) => {
     image:
       'https://res.cloudinary.com/dqxlehni0/image/upload/v1715622109/No_Image_Available_kbdno1.jpg',
     price: 0,
+    codCharge: 0,
+    weight: 0,
+    length: 0,
+    breadth: 0,
+    height: 0,
     category: 'sample category',
     brand: 'sample brand',
     countInStock: 0,

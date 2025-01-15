@@ -44,7 +44,7 @@ export default function ProductEditForm({ productId }: { productId: string }) {
     setValue('name', product.name);
     setValue('slug', product.slug.replace(/\s+/g, '-').toLowerCase());
     setValue('price', product.price);
-    setValue('codCharge', product.codCharge);
+    setValue('codCharge', parseInt(product.codCharge));
     setValue('image', product.image);
     setValue('category', product.category);
     setValue('brand', product.brand);
