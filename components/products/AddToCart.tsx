@@ -20,13 +20,31 @@ const AddToCart = ({ item }: { item: OrderItem }) => {
   };
 
   return existItem ? (
-    <div>
-      <button className='btn' type='button' onClick={() => decrease(existItem)}>
-        -
-      </button>
-      <span className='px-2'>{existItem.qty}</span>
-      <button className='btn' type='button' onClick={() => increase(existItem)}>
-        +
+    <div className='flex flex-col gap-4 w-full justify-center items-center'>
+      <div>
+        <button
+          className='btn'
+          type='button'
+          onClick={() => decrease(existItem)}
+        >
+          -
+        </button>
+        <span className='px-2'>{existItem.qty}</span>
+        <button
+          className='btn'
+          type='button'
+          onClick={() => increase(existItem)}
+        >
+          +
+        </button>
+      </div>
+
+      <button
+        type='button'
+        className='btn btn-primary w-full'
+        onClick={() => router.push('/store/cart')}
+      >
+        Go to Cart
       </button>
     </div>
   ) : (
