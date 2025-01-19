@@ -86,7 +86,7 @@ const Form = () => {
         shippingAddress,
         items,
         itemsPrice,
-        codCharge,
+        codCharge: paymentMethod === 'COD' ? codCharge : 0,
         shippingPrice,
         totalPrice,
         user: { name: session?.user.fullName },
@@ -174,7 +174,10 @@ const Form = () => {
           order_number: orderId,
           payment_type: paymentMethod === 'COD' || 'cod' ? 'cod' : 'prepaid',
           order_amount: totalPrice,
-          package_weight: items.reduce((total, item) => total + item.weight * item.qty, 0),
+          package_weight: items.reduce(
+            (total, item) => total + item.weight * item.qty,
+            0,
+          ),
           package_height: items.reduce(
             (total, item) => total + parseFloat(item.height),
             0,
@@ -353,7 +356,7 @@ const Form = () => {
                 <li>
                   <div className=' flex justify-between'>
                     <div>Cod Charge</div>
-                    <div>₹{codCharge}</div>
+                    <div>₹{(paymentMethod === 'COD' && codCharge) || 0}</div>
                   </div>
                 </li>
                 <li>

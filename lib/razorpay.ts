@@ -24,7 +24,7 @@ export async function createOrders({ orderId }: CreateOrdersInput) {
     return { error: 'Product not found' };
   }
 
-  // console.log("Product details:", order);
+  console.log("Product details:", order.totalPrice);
 
   try {
     const key_id = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;

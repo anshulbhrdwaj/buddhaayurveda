@@ -10,8 +10,13 @@ const Form = () => {
   const router = useRouter();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
 
-  const { codCharge, savePaymentMethod, paymentMethod, shippingAddress } =
-    useCartService();
+  const {
+    items,
+    codCharge,
+    savePaymentMethod,
+    paymentMethod,
+    shippingAddress,
+  } = useCartService();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,10 +38,16 @@ const Form = () => {
         <div className='card-body'>
           <h1 className='card-title'>Payment Method</h1>
           <form onSubmit={handleSubmit}>
-            {['Razorpay', 'Cash On Delivery'].map((payment, index) => (
+            {['Razorpay', 'COD'].map((payment, index) => (
               <div key={payment}>
                 <label className='label cursor-pointer'>
-                  <span className='label-text'>{payment}{index === 1 && ` (Extra ₹${codCharge})`}</span>
+                  <span className='label-text'>
+                    {payment === 'Razorpay'
+                      ? 'Online Payment'
+                      : 'Cash on Delivery'}
+                    {index === 1 &&
+                      ` (Extra ₹${items.reduce((acc, item) => acc + item.codCharge, 0)})`}
+                  </span>
                   <input
                     type='radio'
                     name='paymentMethod'

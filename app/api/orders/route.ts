@@ -4,7 +4,7 @@ import OrderModel, { OrderItem } from '@/lib/models/OrderModel';
 import ProductModel from '@/lib/models/ProductModel';
 import { round2 } from '@/lib/utils';
 
-const calcPrices = (orderItems: OrderItem[]) => {
+const calcPrices = (orderItems: OrderItem[], paymentMethod: string) => {
   // Calculate the items price
   const itemsPrice = round2(
     orderItems.reduce((acc, item) => acc + item.price * item.qty, 0),
@@ -12,7 +12,7 @@ const calcPrices = (orderItems: OrderItem[]) => {
   // Calculate the shipping price
   const shippingPrice = round2(itemsPrice > 100 ? 0 : 10);
   // Calculate the tax price
-  const codCharge = round2(
+  const codCharge = paymentMethod === 'Razorpay' ? 0 : round2(
     orderItems.reduce((acc, item) => acc + item.codCharge, 0),
   );
   // Calculate the total price
@@ -48,12 +48,12 @@ export const POST = auth(async (req: any) => {
     }));
 
     const { itemsPrice, codCharge, shippingPrice, totalPrice } =
-      calcPrices(dbOrderItems);
+      calcPrices(dbOrderItems, payload.paymentMethod);
 
     const newOrder = new OrderModel({
       items: dbOrderItems,
       itemsPrice,
-      codCharge,
+      codCharge: payload.paymentMethod === 'COD' ? codCharge : 0,
       shippingPrice,
       totalPrice,
       shippingAddress: payload.shippingAddress,

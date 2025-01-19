@@ -68,8 +68,10 @@ const useCartService = () => {
           )
         : [...items, { ...item, qty: 1 }];
 
-      const { itemsPrice, shippingPrice, codCharge, totalPrice } =
-        calcPrice(updatedCartItems);
+      const { itemsPrice, shippingPrice, codCharge, totalPrice } = calcPrice(
+        updatedCartItems,
+        paymentMethod,
+      );
       cartStore.setState({
         items: updatedCartItems,
         itemsPrice,
@@ -89,8 +91,10 @@ const useCartService = () => {
               x.slug === item.slug ? { ...exist, qty: exist.qty - 1 } : x,
             );
 
-      const { itemsPrice, shippingPrice, codCharge, totalPrice } =
-        calcPrice(updatedCartItems);
+      const { itemsPrice, shippingPrice, codCharge, totalPrice } = calcPrice(
+        updatedCartItems,
+        paymentMethod,
+      );
       cartStore.setState({
         items: updatedCartItems,
         itemsPrice,
@@ -105,10 +109,21 @@ const useCartService = () => {
       });
     },
     savePaymentMethod: (paymentMethod: string) => {
+      const { items } = cartStore.getState(); // Get the current items in the cart
+      const { itemsPrice, shippingPrice, codCharge, totalPrice } = calcPrice(
+        items,
+        paymentMethod,
+      );
+
       cartStore.setState({
         paymentMethod,
+        itemsPrice,
+        shippingPrice,
+        codCharge,
+        totalPrice,
       });
     },
+
     clear: () => {
       cartStore.setState({
         items: [],
@@ -120,12 +135,15 @@ const useCartService = () => {
 
 export default useCartService;
 
-export const calcPrice = (items: OrderItem[]) => {
+export const calcPrice = (items: OrderItem[], paymentMethod: string) => {
   const itemsPrice = round2(
       items.reduce((acc, item) => acc + item.price * item.qty, 0),
     ),
     shippingPrice = round2(itemsPrice > 100 ? 0 : 100),
-    codCharge = round2(Number(items.reduce((acc, item) => acc + item.codCharge, 0))),
+    codCharge =
+      paymentMethod === 'Razorpay'
+        ? 0
+        : round2(Number(items.reduce((acc, item) => acc + item.codCharge, 0))),
     totalPrice = round2(itemsPrice + shippingPrice + codCharge);
   return { itemsPrice, shippingPrice, codCharge, totalPrice };
 };
